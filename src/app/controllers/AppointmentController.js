@@ -30,7 +30,7 @@ class AppointmentController {
       ],
     });
 
-    res.json(appointments);
+    return res.json(appointments);
   }
 
   async store(req, res) {

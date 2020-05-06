@@ -21,6 +21,7 @@ class ScheduleController {
 
     const appointments = await Appointment.findAll({
       where: {
+        // provider_id: req.userId => traz o id do provider logado
         provider_id: req.userId,
         cancelled_at: null,
         date: {
