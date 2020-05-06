@@ -1,6 +1,9 @@
 import { Router } from 'express';
+
 import multer from 'multer';
 import multerConfig from './config/multer';
+
+// import dos controllers
 import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import FileController from './app/controllers/FileController';
@@ -17,6 +20,7 @@ const upload = multer(multerConfig);
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
 
+// middleware global apenas para as rotas abaixo
 routes.use(authMiddleware);
 
 routes.put('/users', UserController.update);
@@ -25,6 +29,7 @@ routes.post('/files', upload.single('file'), FileController.store);
 
 routes.get('/appointments', AppointmentController.index);
 routes.post('/appointments', AppointmentController.store);
+routes.delete('/appointments/:id', AppointmentController.delete);
 
 routes.get('/schedule', ScheduleController.index);
 

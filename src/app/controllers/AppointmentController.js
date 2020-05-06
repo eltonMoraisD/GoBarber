@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { startOfHour, parseISO, isBefore, format } from 'date-fns';
+import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
@@ -123,6 +123,39 @@ class AppointmentController {
     });
 
     return res.status(200).json(appointments);
+  }
+
+  // cancelar agendamento
+  async delete(req, res) {
+    const appointment = await Appointment.findByPk(req.params.id);
+
+    if (appointment.user_id !== req.userId) {
+      return res.status(401).json({
+        message: " Yo don't have  permission to cancel this appointment.",
+      });
+    }
+
+    /* so pode fazer o cancelamento do agendamento se tiver a 2h do ou mais do horario marcado
+     * se a diferença for < 2h entao o usuario nao pode cancelar o agendamento
+     * agendamento = 4h   agora sao=2h  result = falta 2h entao pode cancelar
+     * agendamento = 4h   agora sao=3h  result = falta 1h entao nao pode cancelar
+     */
+    const dateWithSub = subHours(appointment.date, 2);
+
+    if (isBefore(dateWithSub, new Date())) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Error, you can only cancel appointments 2 hours in advance.',
+      });
+    }
+
+    // setar a data do cancelamento do campo cancelled_at da db
+    appointment.cancelled_at = new Date();
+
+    // salvar  a data do cancelamento nesse campo da db
+    await appointment.save();
+
+    return res.json(appointment);
   }
 }
 
